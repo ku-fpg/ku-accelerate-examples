@@ -1,11 +1,8 @@
 {-# LANGUAGE Strict #-}
-{-# LANGUAGE ViewPatterns #-}
 
 import           Iter
 import           If
 import           TailRec
-
-import           Data.Boolean
 
 fib :: Int -> Int
 fib n = runTailRec go (0, 1, n)
