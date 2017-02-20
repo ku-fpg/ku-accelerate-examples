@@ -8,24 +8,22 @@ import           Iter
 import           TailRec
 import           If
 
-import           Control.Monad.Free
+data South :: * -> * -> * where
+  IfS   :: If   a b -> Maybe (South x b) -> South a b
+  IterS :: Iter a b -> Maybe (South x b) -> South a b
 
-data SouthF :: * -> * where
-  IfS   :: If   a b -> SouthF (a -> b) -> SouthF b
-  IterS :: Iter a b -> SouthF (a -> b) -> SouthF b
-  Done  :: SouthF b
+deriving instance Functor (South a)
 
-deriving instance Functor SouthF
+stepS :: b -> South b a
+stepS = (`IterS` Nothing) . step
 
-type South = Free SouthF
-
-stepS :: b -> South a
-stepS = liftF . (`IterS` Done) . step
-
-doneS :: a -> South a
-doneS = liftF . (`IterS` Done) . done
+doneS :: a -> South b a
+doneS = (`IterS` Nothing) . done
 
 -- XXX: Does this make sense with the type as it is now?
-iterLoopS :: (a -> South b) -> a -> b
-iterLoopS f x = undefined
+runSouth :: (a -> South a b) -> a -> b
+runSouth f x =
+  case f x of
+    IfS   i k -> runIf    (const i) x
+    IterS i k -> iterLoop (const i) x
 
