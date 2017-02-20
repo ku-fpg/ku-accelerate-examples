@@ -11,18 +11,19 @@ import           If
 import           Control.Monad.Free
 
 data SouthF :: * -> * where
-  IfS   :: If a b   -> SouthF b
-  IterS :: Iter a b -> SouthF b
+  IfS   :: If   a b -> SouthF (a -> b) -> SouthF b
+  IterS :: Iter a b -> SouthF (a -> b) -> SouthF b
+  Done  :: SouthF b
 
 deriving instance Functor SouthF
 
 type South = Free SouthF
 
 stepS :: b -> South a
-stepS = liftF . IterS . step
+stepS = liftF . (`IterS` Done) . step
 
 doneS :: a -> South a
-doneS = liftF . IterS . done
+doneS = liftF . (`IterS` Done) . done
 
 -- XXX: Does this make sense with the type as it is now?
 iterLoopS :: (a -> South b) -> a -> b
