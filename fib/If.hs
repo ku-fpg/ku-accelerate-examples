@@ -1,3 +1,5 @@
+{-# LANGUAGE DeriveFunctor #-}
+
 module If where
 
 data If a b
@@ -6,6 +8,7 @@ data If a b
     , getTrue  :: b
     , getFalse :: b
     }
+    deriving Functor
 
 runIf :: (a -> If a b) -> a -> b
 runIf f x =
