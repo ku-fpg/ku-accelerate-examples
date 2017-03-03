@@ -1,8 +1,8 @@
 {-# LANGUAGE Strict #-}
 
-import           Iter
-import           If
-import           TailRec
+-- import           Iter
+-- import           If
+-- import           TailRec
 
 fib :: Int -> Int
 fib n = runTailRec go (0, 1, n)
@@ -10,9 +10,9 @@ fib n = runTailRec go (0, 1, n)
       -- go :: (Int, Int, Int) -> If (Int, Int, Int) (Iter (Int, Int, Int) Int)
       go :: TailRec (Int, Int, Int) Int
       go (a, b, i)
-        = If (\(a, b, i) -> i > 0)
-             (step (b, (a+b), (i-1)))
-             (done b)
+        = ifS (\(a, b, i) -> i > 0)
+              (stepS (b, (a+b), (i-1)))
+              (doneS b)
 
 fibSpec :: Int -> Int
 fibSpec 0 = 1

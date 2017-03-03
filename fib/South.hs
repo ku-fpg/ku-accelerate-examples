@@ -8,26 +8,25 @@ import           Iter
 import           TailRec
 import           If
 
-import           Data.Proxy
-import           Data.Type.Equality
+-- import           Data.Proxy
+-- import           Data.Type.Equality
 
-data South :: * -> * -> * where
-  IfS   :: (a -> If   a b) -> (b -> South b c) -> South a c
-  IterS :: (a -> Iter a b) -> (b -> South b c) -> South a c
-  FinishS :: b -> South a b
+data South a b where
+  IfS   :: Bool -> (a -> South a b) -> (a -> South a b) -> South a b
+  DoneS :: b -> South a b
+  StepS :: a -> South a b
 
-deriving instance Functor (South a)
+ifS :: Bool -> (a -> South a b) -> (a -> South a b) -> South a b
+ifS = IfS
 
-stepS :: b -> South b a
-stepS x = IterS (const (step x)) FinishS
+doneS :: b -> South a b
+doneS = DoneS
 
-doneS :: a -> South b a
-doneS x = IterS (const (done x)) FinishS
+stepS :: a -> South a b
+stepS = StepS
 
--- XXX: Does this make sense with the type as it is now?
-runSouth :: (a -> South a b) -> a -> b
-runSouth f x =
+runS :: (a -> South a b) -> a -> b
+runS f x =
   case f x of
-    IfS   i k -> runSouth k (runIf    i x)
-    IterS i k -> runSouth k (iterLoop i x)
+    IfS False t f -> runS f x
 
