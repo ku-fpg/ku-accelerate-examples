@@ -1,0 +1,38 @@
+  -- Start in the right spot
+application-of 'transform
+
+app-arg
+unfold
+up
+
+unfold-rule "Acc-start"; assume
+
+-- unfold
+-- repeat (one-td let-subst)
+
+repeat (one-td (unfold 'tripleCanonical))
+repeat (one-td case-reduce)
+
+try (repeat (one-td case-elim-inline-scrutinee))
+
+-- repeat (one-td (unfold-rule ">-intro"))
+
+one-td (unfold-rule "abs-iterLoop-float"); assume
+repeat (one-td let-subst)
+
+one-td (unfold 'iterComp)
+repeat (one-td let-subst)
+
+one-td (unfold-rule "iterToWhile-intro"); assume
+one-td (unfold 'iterToWhile)
+
+repeat (one-td (unfold '.))
+repeat (one-td (beta-reduce >>> let-subst))
+
+
+
+-- -- Finish
+-- top
+-- application-of 'transform
+-- unfold-rule "Acc-finish"; assume
+
