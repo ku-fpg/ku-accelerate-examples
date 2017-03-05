@@ -81,7 +81,7 @@ rep _ = error "Internal error: rep called"
            (init :: (Int, Int, Int)).
     rep (iterLoop f init)
       =
-    iterLoop' (f . rep) (abs init)
+    rep (iterLoop (f . rep) (abs init))
   #-}
     -- rep (iterLoop (\x -> f (rep x)) (abs init))
 
