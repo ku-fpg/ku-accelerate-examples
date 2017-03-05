@@ -37,7 +37,7 @@ main = print (transform (fib 20))
 
 
 abs :: (Lift Exp a, a ~ Plain a) => a -> Exp a
-abs = lift
+abs x = lift x
 {-# NOINLINE abs #-}
 
 -- | All calls to 'rep' should be gone by the time compilation finishes.
@@ -67,12 +67,23 @@ rep _ = error "Internal error: rep called"
   #-}
 
 {-# RULES "abs-iterLoop-float" [~]
-    forall f (init :: (Int, Int, Int)).
+    forall (f :: (Int, Int, Int) -> Iter (Int, Int, Int) Int)
+           (init :: (Int, Int, Int)).
     abs (iterLoop f init)
       =
-    iterLoop (iterComp rep abs abs f) (abs init)
+    iterLoop (iterComp id id abs f) init
   #-}
     -- iterLoop (abs . f) (rep (abs init))
+
+
+{-# RULES "rep-float-iterLoop" [~]
+    forall (f :: (Int, Int, Int) -> Iter (Exp (Int, Int, Int)) (Exp Int))
+           (init :: (Int, Int, Int)).
+    rep (iterLoop f init)
+      =
+    iterLoop' (f . rep) (abs init)
+  #-}
+    -- rep (iterLoop (\x -> f (rep x)) (abs init))
 
 {-# RULES "iterToWhile-intro" [~]
     forall (f :: Exp (Int, Int, Int) -> Iter (Exp (Int, Int, Int)) (Exp Int))

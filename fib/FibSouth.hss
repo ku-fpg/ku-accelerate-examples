@@ -18,7 +18,20 @@ try (repeat (one-td case-elim-inline-scrutinee))
 -- repeat (one-td (unfold-rule ">-intro"))
 
 one-td (unfold-rule "abs-iterLoop-float"); assume
-repeat (one-td let-subst)
+try (repeat (one-td let-subst))
+
+app-arg
+case-float-arg-lemma "rep-case-float-lemma"; assume
+
+one-td case-elim
+one-td (unfold 'iterComp)
+one-td let-subst
+stop-script
+one-td (unfold-rule "rep-float-iterLoop"); assume
+
+
+
+
 
 one-td (unfold 'iterComp)
 repeat (one-td let-subst)
