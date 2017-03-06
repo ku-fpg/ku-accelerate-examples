@@ -31,7 +31,20 @@ one-td (unfold-rule ">*-intro"); assume
 
 repeat (one-td let-subst)
 repeat (one-td case-elim)
+one-td (unfold-rule "iterToWhile-intro"); assume
+
+repeat (one-td (unfold 'done))
+repeat (one-td (unfold 'done1))
+repeat (one-td (unfold 'step))
+repeat (one-td (unfold 'step1))
 stop-script
+
+
+
+
+
+
+
 
 -- unfold
 -- repeat (one-td let-subst)
