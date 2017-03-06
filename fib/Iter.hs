@@ -1,14 +1,37 @@
 {-# LANGUAGE DeriveFunctor #-}
 {-# LANGUAGE RankNTypes #-}
+{-# LANGUAGE FlexibleContexts #-}
+{-# LANGUAGE TypeFamilies #-}
 
 module Iter where
+
+import           Prelude hiding (abs)
 
 import qualified Data.Array.Accelerate as A
 import           Data.Array.Accelerate (Exp, Lift, lift, Plain, (>*))
 import           Data.Array.Accelerate.Interpreter as A
 
-newtype Iter a b = Iter { getIter :: forall r. (a -> r) -> (b -> r) -> r }
+import           Data.Bifunctor
+
+abs :: (Lift Exp a, a ~ Plain a) => a -> Exp a
+abs x = lift x
+{-# NOINLINE abs #-}
+
+-- | All calls to 'rep' should be gone by the time compilation finishes.
+rep :: Exp a -> a
+rep _ = error "Internal error: rep called"
+{-# NOINLINE rep #-}
+
+-- newtype Iter a b = Iter { getIter :: forall r. (a -> r) -> (b -> r) -> r }
+newtype Iter a b = Iter (forall r. (a -> r) -> (b -> r) -> r)
   deriving (Functor)
+
+instance Bifunctor Iter where
+  first f (Iter i) = Iter $ \g h -> i (g . f) h
+  second = fmap
+
+getIter :: Iter a b -> (forall r. (a -> r) -> (b -> r) -> r)
+getIter (Iter f) = f
 
 step :: a -> Iter a b
 step x = Iter $ \f g -> f x
@@ -21,6 +44,12 @@ done x = Iter $ \f g -> g x
 iterLoop :: (a -> Iter a b) -> a -> b
 iterLoop f x = getIter (f x) (iterLoop f) id
 {-# NOINLINE iterLoop #-}
+
+-- -- iterLoop' :: (Lift Exp a) => (a -> Iter (Exp a) b) -> a -> b
+-- iterLoop' :: (Exp (Int, Int, Int) -> Iter (Exp (Int, Int, Int)) (Exp Int))
+--                -> Exp (Int, Int, Int) -> Exp Int
+-- iterLoop' f x = getIter (f (abs (rep x))) (iterLoop (f . abs . rep)) id
+-- {-# NOINLINE iterLoop' #-}
 
 -- | Turn the last step into an `id`
 doneToId :: (a -> Iter a b) -> (a -> Iter a a)

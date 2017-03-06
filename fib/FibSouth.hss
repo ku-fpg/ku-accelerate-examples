@@ -1,3 +1,6 @@
+set-pp-coercion Omit
+set-pp-type Omit
+
   -- Start in the right spot
 application-of 'transform
 
@@ -6,6 +9,29 @@ unfold
 up
 
 unfold-rule "Acc-start"; assume
+try (repeat (one-td case-reduce))
+one-td (unfold-rule "abs-iterLoop-float"); assume
+repeat (one-td let-subst)
+one-td (unfold 'iterComp)
+
+repeat (one-td (unfold '.))
+one-td (let-subst)
+
+one-td (unfold 'iterLoop)
+repeat (one-td beta-reduce)
+one-td case-elim
+repeat (one-td let-subst)
+
+smash -- TODO: Find out why this helps here
+
+one-td (unfold-rule "cond-intro"); assume
+repeat (one-td (unfold-rule "rep-abs-elim")); assume
+
+one-td (unfold-rule ">*-intro"); assume
+
+repeat (one-td let-subst)
+repeat (one-td case-elim)
+stop-script
 
 -- unfold
 -- repeat (one-td let-subst)
@@ -26,6 +52,13 @@ case-float-arg-lemma "rep-case-float-lemma"; assume
 one-td case-elim
 one-td (unfold 'iterComp)
 one-td let-subst
+-- one-td (unfold 'iterLoop)
+-- smash
+-- one-td (unfold-rule "+-intro'");assume
+one-td (unfold-rule "iterToWhile-intro"); assume
+one-td (unfold "iterWhile")
+
+
 stop-script
 one-td (unfold-rule "rep-float-iterLoop"); assume
 

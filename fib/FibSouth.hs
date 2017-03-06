@@ -15,6 +15,7 @@ import           Data.Array.Accelerate (Exp, Lift, lift, Plain, (>*))
 import           Data.Array.Accelerate.Interpreter as A
 
 import           Data.Function
+import           Data.Bifunctor
 
 fib :: Int -> Int
 fib n = iterLoop go (0, 1, n)
@@ -36,15 +37,6 @@ main :: IO ()
 main = print (transform (fib 20))
 
 
-abs :: (Lift Exp a, a ~ Plain a) => a -> Exp a
-abs x = lift x
-{-# NOINLINE abs #-}
-
--- | All calls to 'rep' should be gone by the time compilation finishes.
-rep :: Exp a -> a
-rep _ = error "Internal error: rep called"
-{-# NOINLINE rep #-}
-
 
 {-# RULES "Acc-start" [~]
     forall (x :: Int).
@@ -61,9 +53,15 @@ rep _ = error "Internal error: rep called"
   #-}
 
 
+-- TODO: Make sure it makes sense to have *both* of these elimination
+-- rules:
 {-# RULES "abs-rep-elim" [~]
     forall x.
     abs (rep x) = x
+  #-}
+{-# RULES "rep-abs-elim" [~]
+    forall x.
+    rep (abs x) = x
   #-}
 
 {-# RULES "abs-iterLoop-float" [~]
@@ -71,19 +69,42 @@ rep _ = error "Internal error: rep called"
            (init :: (Int, Int, Int)).
     abs (iterLoop f init)
       =
-    iterLoop (iterComp id id abs f) init
+    iterLoop (iterComp rep abs abs f) (abs init)
   #-}
+    -- iterLoop (bimap abs abs . f . rep) (abs init)
+    -- iterLoop (iterComp rep abs abs f) (abs init)
     -- iterLoop (abs . f) (rep (abs init))
 
-
-{-# RULES "rep-float-iterLoop" [~]
-    forall (f :: (Int, Int, Int) -> Iter (Exp (Int, Int, Int)) (Exp Int))
-           (init :: (Int, Int, Int)).
-    rep (iterLoop f init)
+{-# RULES "cond-intro" [~]
+    forall c t (f :: Exp Int).
+    rep (if c then t else f)
       =
-    rep (iterLoop (f . rep) (abs init))
+    rep (A.cond (abs c) t f)
   #-}
-    -- rep (iterLoop (\x -> f (rep x)) (abs init))
+
+{-# RULES ">*-intro" [~]
+    forall a (b :: Int).
+    abs (a > b)
+      =
+    abs a >* abs b
+  #-}
+
+{-# RULES "+-intro'" [~]
+    forall (f :: (Int, Int, Int) -> Int) g x (y :: (Int, Int, Int)).
+    f (rep (abs x)) + g (rep (abs y))
+      =
+    rep (abs (f x + g y))
+  #-}
+
+-- {-# RULES "rep-float-iterLoop" [~]
+--     forall (f :: (Int, Int, Int) -> Iter (Exp (Int, Int, Int)) (Exp Int))
+--            (init :: (Int, Int, Int)).
+--     iterLoop f init
+--       =
+--     iterLoop (f . rep) (abs init)
+--   #-}
+--     -- iterLoop (f . rep) (abs init)
+--     -- rep (iterLoop (\x -> f (rep x)) (abs init))
 
 {-# RULES "iterToWhile-intro" [~]
     forall (f :: Exp (Int, Int, Int) -> Iter (Exp (Int, Int, Int)) (Exp Int))
