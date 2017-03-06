@@ -23,7 +23,7 @@ rep _ = error "Internal error: rep called"
 {-# NOINLINE rep #-}
 
 -- newtype Iter a b = Iter { getIter :: forall r. (a -> r) -> (b -> r) -> r }
-newtype Iter a b = Iter (forall r. (a -> r) -> (b -> r) -> r)
+data Iter a b = Iter (forall r. (a -> r) -> (b -> r) -> r)
   deriving (Functor)
 
 instance Bifunctor Iter where
@@ -32,6 +32,7 @@ instance Bifunctor Iter where
 
 getIter :: Iter a b -> (forall r. (a -> r) -> (b -> r) -> r)
 getIter (Iter f) = f
+{-# NOINLINE getIter #-}
 
 step :: a -> Iter a b
 step x = Iter $ \f g -> f x
