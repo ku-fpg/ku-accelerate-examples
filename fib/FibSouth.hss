@@ -10,6 +10,8 @@ up
 
 unfold-rule "Acc-start"; assume
 try (repeat (one-td case-reduce))
+
+  -- Set up tail recursion transformation --
 one-td (unfold-rule "abs-iterLoop-float"); assume
 repeat (one-td let-subst)
 one-td (unfold 'iterComp)
@@ -33,6 +35,9 @@ repeat (one-td (unfold '.))
 
 repeat (one-td (unfold 'getIter))
 smash
+
+  -- Cond transformation --
+one-td (unfold-rule "cond-intro-abs"); assume
 
 
 

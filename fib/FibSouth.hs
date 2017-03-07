@@ -82,6 +82,13 @@ main = print (transform (fib 20))
     rep (A.cond (abs c) t f)
   #-}
 
+{-# RULES "cond-intro-abs" [~]
+    forall c t f.
+    abs (if c then t else f)
+      =
+    A.cond (abs c) t f
+  #-}
+
 {-# RULES ">*-intro" [~]
     forall a (b :: Int).
     abs (a > b)
