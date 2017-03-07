@@ -1,6 +1,7 @@
 {-# LANGUAGE Strict #-}
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE TypeFamilies #-}
+{-# OPTIONS_GHC -fno-defer-type-errors #-}
 
 import           Prelude hiding (abs)
 
@@ -83,10 +84,10 @@ main = print (transform (fib 20))
   #-}
 
 {-# RULES "cond-intro-abs" [~]
-    forall c t f.
+    forall c t (f :: Bool).
     abs (if c then t else f)
       =
-    A.cond (abs c) t f
+    A.cond (abs c) (abs t) (abs f)
   #-}
 
 {-# RULES ">*-intro" [~]
