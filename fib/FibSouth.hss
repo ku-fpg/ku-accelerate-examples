@@ -38,6 +38,42 @@ smash
 
   -- Cond transformation --
 one-td (unfold-rule "cond-intro-abs"); assume
+repeat (one-td (unfold 'getCondition1))
+repeat (one-td (unfold 'getCondition2))
+smash
+
+-- Push abs and rep into conditionals of loop body
+one-td (unfold-rule "while-abs-rep-intro-body"); assume
+repeat (one-td (unfold '.))
+repeat (one-td (beta-reduce >>> let-subst))
+repeat (one-td (unfold-rule "abs-rep-if")); assume
+
+repeat (one-td (unfold-rule "abs-float-triple")); assume
+repeat (one-td let-subst)
+repeat (one-td case-elim)
+
+repeat (one-td (unfold-rule "abs-float-+")); assume
+repeat (one-td (unfold-rule "abs-float--")); assume
+repeat (one-td (unfold-rule ">*-intro")); assume
+repeat (one-td case-elim)
+
+repeat (one-td (unfold-rule "abs-float-triple1st")); assume
+repeat (one-td (unfold-rule "abs-float-triple2nd")); assume
+repeat (one-td (unfold-rule "abs-float-triple3rd")); assume
+
+repeat (one-td case-elim)
+repeat (one-td (unfold-rule "abs-rep-elim")); assume
+repeat (one-td case-elim)
+
+-- -- Push abs and rep into conditionals of loop body
+-- one-td (unfold-rule "while-abs-rep-intro-body"); assume
+-- repeat (one-td (unfold '.))
+-- repeat (one-td (beta-reduce >>> let-subst))
+-- repeat (one-td (unfold-rule "abs-rep-if")); assume
+
+repeat (one-td let-subst)
+repeat (one-td case-elim)
+
 
 
 

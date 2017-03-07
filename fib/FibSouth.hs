@@ -90,6 +90,59 @@ main = print (transform (fib 20))
     A.cond (abs c) (abs t) (abs f)
   #-}
 
+-- Push abs and rep into the conditionals of fn:
+{-# RULES "while-abs-rep-intro-body" [~]
+    forall c fn (init :: Exp (Int, Int, Int)).
+    A.while c fn init
+      =
+    A.while c (abs . rep . fn) init
+  #-}
+{-# RULES "abs-rep-if" [~]
+    forall c t (f :: Exp (Int, Int, Int)).
+    abs (rep (if c then t else f))
+      =
+    A.cond (abs c) t f
+  #-}
+
+{-# RULES "abs-float-triple" [~]
+    forall (a :: Int) (b :: Int) (c :: Int).
+    abs (a, b, c)
+      =
+    lift (abs a, abs b, abs c)
+  #-}
+{-# RULES "abs-float-triple1st" [~]
+    forall (x :: (Int, Int, Int)).
+    abs (triple1st x)
+      =
+    triple1st (A.unlift (abs x) :: (Exp Int, Exp Int, Exp Int))
+  #-}
+{-# RULES "abs-float-triple2nd" [~]
+    forall (x :: (Int, Int, Int)).
+    abs (triple2nd x)
+      =
+    triple2nd (A.unlift (abs x) :: (Exp Int, Exp Int, Exp Int))
+  #-}
+{-# RULES "abs-float-triple3rd" [~]
+    forall (x :: (Int, Int, Int)).
+    abs (triple3rd x)
+      =
+    triple3rd (A.unlift (abs x) :: (Exp Int, Exp Int, Exp Int))
+  #-}
+
+{-# RULES "abs-float-+" [~]
+    forall a (b :: Int).
+    abs (a + b)
+      =
+    abs a + abs b
+  #-}
+{-# RULES "abs-float--" [~]
+    forall a (b :: Int).
+    abs (a - b)
+      =
+    abs a - abs b
+  #-}
+
+
 {-# RULES ">*-intro" [~]
     forall a (b :: Int).
     abs (a > b)
