@@ -1,5 +1,5 @@
-set-pp-coercion Omit
-set-pp-type Omit
+-- set-pp-coercion Omit
+set-pp-type Abstract
 
   -- Start in the right spot
 application-of 'transform
@@ -13,85 +13,33 @@ try (repeat (one-td case-reduce))
 one-td (unfold-rule "abs-iterLoop-float"); assume
 repeat (one-td let-subst)
 one-td (unfold 'iterComp)
+one-td (unfold '$witerComp)
 
-repeat (one-td (unfold '.))
-one-td (let-subst)
+repeat (one-td (beta-reduce >>> let-subst))
 
-one-td (unfold 'iterLoop)
-repeat (one-td beta-reduce)
-one-td case-elim
-repeat (one-td let-subst)
+{ application-of 'getIter
+  app-fun
+  case-float-arg-lemma "getIter-float"; assume
+}
 
-smash -- TODO: Find out why this helps here
-
-one-td (unfold-rule "cond-intro"); assume
-repeat (one-td (unfold-rule "rep-abs-elim")); assume
-
-one-td (unfold-rule ">*-intro"); assume
-
-repeat (one-td let-subst)
-repeat (one-td case-elim)
-one-td (unfold-rule "iterToWhile-intro"); assume
-
--- repeat (one-td (unfold 'done))
--- repeat (one-td (unfold 'done1))
--- repeat (one-td (unfold 'step))
--- repeat (one-td (unfold 'step1))
-stop-script
-
-
-
-
-
-
-
-
--- unfold
--- repeat (one-td let-subst)
-
-repeat (one-td (unfold 'tripleCanonical))
-repeat (one-td case-reduce)
-
-try (repeat (one-td case-elim-inline-scrutinee))
-
--- repeat (one-td (unfold-rule ">-intro"))
-
-one-td (unfold-rule "abs-iterLoop-float"); assume
-try (repeat (one-td let-subst))
-
-app-arg
-case-float-arg-lemma "rep-case-float-lemma"; assume
-
-one-td case-elim
-one-td (unfold 'iterComp)
-one-td let-subst
--- one-td (unfold 'iterLoop)
--- smash
--- one-td (unfold-rule "+-intro'");assume
-one-td (unfold-rule "iterToWhile-intro"); assume
-one-td (unfold "iterWhile")
-
-
-stop-script
-one-td (unfold-rule "rep-float-iterLoop"); assume
-
-
-
-
-
-one-td (unfold 'iterComp)
-repeat (one-td let-subst)
+smash
 
 one-td (unfold-rule "iterToWhile-intro"); assume
 one-td (unfold 'iterToWhile)
-
+one-td (unfold 'splitLoop)
+smash
+repeat (one-td (unfold 'doneToId))
 repeat (one-td (unfold '.))
-repeat (one-td (beta-reduce >>> let-subst))
+
+repeat (one-td (unfold 'getIter))
+smash
+
 
 
 
 -- -- Finish
 -- top
+-- TODO: Unfold lastStep, then iterWhile one level and do abs-rep elimination
 -- application-of 'transform
 -- unfold-rule "Acc-finish"; assume
 

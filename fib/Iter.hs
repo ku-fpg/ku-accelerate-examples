@@ -73,7 +73,7 @@ iterComp a'a aa' bb' iter x =
 iterToWhile :: (A.Elt a, A.Elt b) => (Exp a -> Iter (Exp a) (Exp b)) -> Exp a -> Exp b
 iterToWhile f init
   = lastStep f
-    $ A.while (lift . conditional)
+    $ A.while (abs . conditional)
               body
               init
   where
