@@ -33,6 +33,7 @@ smash
 repeat (one-td (unfold 'doneToId))
 repeat (one-td (unfold '.))
 
+stop-script
 repeat (one-td (unfold 'getIter))
 smash
 
@@ -72,7 +73,24 @@ repeat (one-td case-elim)
 -- repeat (one-td (unfold-rule "abs-rep-if")); assume
 
 repeat (one-td let-subst)
-repeat (one-td case-elim)
+try (repeat (one-td case-elim))
+
+--one-td (unfold-rule "lastStep-rep-absImpossible-intro"); assume
+--one-td (unfold 'getIter)
+--one-td case-reduce
+--repeat (one-td (beta-reduce >>> let-subst))
+
+--one-td (unfold 'lastStep)
+--one-td (unfold 'iterLoop)
+
+--{ application-of 'getIter
+--  repeat (one-td (beta-reduce >>> let-subst))
+--  one-td case-inline-scrutinee -- TODO: Find a better way. This dramatically
+--                               -- increases generated code size
+--  one-td case-elim
+--  one-td (unfold-rule "rep-absImpossible-if"); assume
+--}
+
 
 
 

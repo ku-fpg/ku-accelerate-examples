@@ -17,6 +17,10 @@ abs :: (Lift Exp a, a ~ Plain a) => a -> Exp a
 abs x = lift x
 {-# NOINLINE abs #-}
 
+-- | All calls to 'absImpossible' should be gone by the time compilation finishes.
+absImpossible :: a -> Exp a
+absImpossible _ = error "Internal error: absImpossible called"
+
 -- | All calls to 'rep' should be gone by the time compilation finishes.
 rep :: Exp a -> a
 rep _ = error "Internal error: rep called"
