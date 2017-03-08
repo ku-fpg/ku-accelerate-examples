@@ -15,39 +15,37 @@ try (repeat (one-td case-reduce))
 one-td (unfold-rule "abs-iterLoop-float"); assume
 repeat (one-td let-subst)
 one-td (unfold 'iterComp)
-one-td (unfold '$witerComp)
+--one-td (unfold '$witerComp)
 
-repeat (one-td (beta-reduce >>> let-subst))
 
-{ application-of 'getIter
-  app-fun
-  case-float-arg-lemma "getIter-float"; assume
-}
-
-smash
+repeat (one-td case-elim)
 
 one-td (unfold-rule "iterToWhile-intro"); assume
 one-td (unfold 'iterToWhile)
+  --stop-script
+repeat (one-td let-subst)
+repeat (one-td case-float-case)
 one-td (unfold 'splitLoop)
+one-td (unfold '$wsplitLoop)
 smash
-repeat (one-td (unfold 'doneToId))
+one-td (unfold-rule "while-abs-rep-intro-body"); assume
+
 repeat (one-td (unfold '.))
 
-stop-script
+one-bu (unfold 'splitLoop)
+one-bu (unfold '$wsplitLoop)
+
+repeat (one-td (beta-reduce >>> let-subst))
+repeat (one-td case-reduce)
+repeat (one-td (beta-reduce >>> let-subst))
+
+smash
 repeat (one-td (unfold 'getIter))
 smash
-
-  -- Cond transformation --
+one-td (unfold-rule "abs-rep-if"); assume
 one-td (unfold-rule "cond-intro-abs"); assume
-repeat (one-td (unfold 'getCondition1))
-repeat (one-td (unfold 'getCondition2))
-smash
+repeat (one-td case-elim)
 
--- Push abs and rep into conditionals of loop body
-one-td (unfold-rule "while-abs-rep-intro-body"); assume
-repeat (one-td (unfold '.))
-repeat (one-td (beta-reduce >>> let-subst))
-repeat (one-td (unfold-rule "abs-rep-if")); assume
 
 repeat (one-td (unfold-rule "abs-float-triple")); assume
 repeat (one-td let-subst)
@@ -64,41 +62,40 @@ repeat (one-td (unfold-rule "abs-float-triple3rd")); assume
 
 repeat (one-td case-elim)
 repeat (one-td (unfold-rule "abs-rep-elim")); assume
-repeat (one-td case-elim)
+smash
+stop-script
 
--- -- Push abs and rep into conditionals of loop body
--- one-td (unfold-rule "while-abs-rep-intro-body"); assume
--- repeat (one-td (unfold '.))
--- repeat (one-td (beta-reduce >>> let-subst))
--- repeat (one-td (unfold-rule "abs-rep-if")); assume
+one-td (unfold 'lastStep)
+one-td beta-reduce
+one-td let-float
+one-td let-float
+one-td let-float
+one-td let-float
+one-td (unfold-rule "getIter-if"); assume
+repeat (one-td (unfold-rule ">*-intro"))
+one-bu let-subst
+one-bu case-elim
+repeat (one-td (unfold-rule "abs-float-triple3rd"))
+repeat (one-td (unfold-rule "abs-rep-elim"))
 
-repeat (one-td let-subst)
-try (repeat (one-td case-elim))
 
---one-td (unfold-rule "lastStep-rep-absImpossible-intro"); assume
---one-td (unfold 'getIter)
---one-td case-reduce
---repeat (one-td (beta-reduce >>> let-subst))
-
---one-td (unfold 'lastStep)
---one-td (unfold 'iterLoop)
-
---{ application-of 'getIter
---  repeat (one-td (beta-reduce >>> let-subst))
---  one-td case-inline-scrutinee -- TODO: Find a better way. This dramatically
---                               -- increases generated code size
---  one-td case-elim
---  one-td (unfold-rule "rep-absImpossible-if"); assume
---}
+stop-script
 
 
 
 
 
 
--- -- Finish
--- top
+
+
+
+
+
+
+
+-- Finish
+top
 -- TODO: Unfold lastStep, then iterWhile one level and do abs-rep elimination
--- application-of 'transform
--- unfold-rule "Acc-finish"; assume
+application-of 'transform
+unfold-rule "Acc-finish"; assume
 

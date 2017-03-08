@@ -109,6 +109,12 @@ main = print (transform (fib 20))
       =
     A.cond (abs c) (getIter t x y :: Exp (Int, Int, Int)) (getIter f x y)
   #-}
+{-# RULES "getIter-if" [~]
+    forall c t (f :: (Iter (Exp (Int, Int, Int)) (Exp Int))) x y.
+    getIter (if c then t else f) x y
+      =
+    A.cond (abs c) (getIter t x y :: Exp Int) (getIter f x y)
+  #-}
 
 
 {-# RULES "lastStep-rep-absImpossible-intro" [~]
@@ -118,12 +124,12 @@ main = print (transform (fib 20))
     lastStep (\w -> rep (absImpossible (getIter (f w) step done))) x
   #-}
 
-{-# RULES "Iter-abs-rep-intro" [~]
-    forall (body :: forall r. (Exp (Int, Int, Int) -> r) -> (Exp Int -> r) -> r).
-    Iter body
-      =
-    Iter (getIter (bimap (abs . rep) (abs . rep) (Iter (\f g -> body f g))))
-  #-}
+-- {-# RULES "Iter-abs-rep-intro" [~]
+--     forall (body :: forall r. (Exp (Int, Int, Int) -> r) -> (Exp Int -> r) -> r).
+--     Iter body
+--       =
+--     Iter (getIter (bimap (abs . rep) (abs . rep) (Iter (\f g -> body f g))))
+--   #-}
 
 -- -- Get rid of reps in 'lastStep' call:
 -- {-# RULES "lastCall-abs-rep-intro" [~]

@@ -27,23 +27,33 @@ rep _ = error "Internal error: rep called"
 {-# NOINLINE rep #-}
 
 -- newtype Iter a b = Iter { getIter :: forall r. (a -> r) -> (b -> r) -> r }
-data Iter a b = Iter (forall r. (a -> r) -> (b -> r) -> r)
-  deriving (Functor)
+-- data Iter a b = Iter (forall r. (a -> r) -> (b -> r) -> r)
+--   deriving (Functor)
+
+data Iter a b
+  = Step a
+  | Done b
+  deriving Functor
 
 instance Bifunctor Iter where
-  first f (Iter i) = Iter $ \g h -> i (g . f) h
+  first f (Step a) = Step (f a)
   second = fmap
 
+iterBimap :: (a -> a') -> (b -> b') -> Iter a b -> Iter a' b'
+iterBimap f g (Step a) = Step (f a)
+iterBimap f g (Done b) = Done (g b)
+
 getIter :: Iter a b -> (forall r. (a -> r) -> (b -> r) -> r)
-getIter (Iter f) = f
+getIter (Step a) f _ = f a
+getIter (Done b) _ g = g b
 {-# NOINLINE getIter #-}
 
 step :: a -> Iter a b
-step x = Iter $ \f g -> f x
+step = Step
 {-# NOINLINE step #-}
 
 done :: b -> Iter a b
-done x = Iter $ \f g -> g x
+done = Done
 {-# NOINLINE done #-}
 
 iterLoop :: (a -> Iter a b) -> a -> b
@@ -67,12 +77,18 @@ loopBody f x = getIter (f x) id id
 -- recursion inside of 'iterLoop' will not be performed.
 -- TODO: Add machinery to verify this restriction.
 lastStep :: (a -> Iter a b) -> a -> b
-lastStep = iterLoop
+lastStep f x = getIter (f x) f' id
+  where
+    f' z =
+      case f z of
+        Done r -> r
+        Step _ -> error "lastStep: Should be actual last step"
 {-# NOINLINE lastStep #-}
 
 iterComp :: (a' -> a) -> (a -> a') -> (b -> b') -> (a -> Iter a b) -> (a' -> Iter a' b')
 iterComp a'a aa' bb' iter x =
-  Iter $ \f g -> getIter (iter (a'a x)) (f . aa') (g . bb')
+  -- Iter $ \f g -> getIter (iter (a'a x)) (f . aa') (g . bb')
+  iterBimap aa' bb' (iter (a'a x))
 
 iterToWhile :: (A.Elt a, A.Elt b) => (Exp a -> Iter (Exp a) (Exp b)) -> Exp a -> Exp b
 iterToWhile f init
