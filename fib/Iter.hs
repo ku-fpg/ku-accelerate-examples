@@ -77,12 +77,19 @@ loopBody f x = getIter (f x) id id
 -- recursion inside of 'iterLoop' will not be performed.
 -- TODO: Add machinery to verify this restriction.
 lastStep :: (a -> Iter a b) -> a -> b
-lastStep f x = getIter (f x) f' id
-  where
-    f' z =
-      case f z of
+lastStep f x = -- getIter (f x) f' id
+  case f x of
+    Done r -> r
+    Step a ->
+      case f a of
         Done r -> r
-        Step _ -> error "lastStep: Should be actual last step"
+        _      -> error "lastStep: Should be actual last step"
+    -- _ -> error "lastStep: Shouldn't run after actual last step"
+  -- where
+  --   f' z =
+  --     case f z of
+  --       Done r -> r
+  --       Step _ -> error "lastStep: Should be actual last step"
 {-# NOINLINE lastStep #-}
 
 iterComp :: (a' -> a) -> (a -> a') -> (b -> b') -> (a -> Iter a b) -> (a' -> Iter a' b')
@@ -106,6 +113,7 @@ splitLoop f = (loop, (loopBody (doneToId f), getCondition . f))
     loop = iterLoop f
 
 getCondition :: Iter b a -> Bool
+-- getCondition f = getIter f (const False) (const True)
 getCondition f = getIter f (const True) (const False)
 
 

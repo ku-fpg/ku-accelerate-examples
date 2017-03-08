@@ -63,23 +63,24 @@ repeat (one-td (unfold-rule "abs-float-triple3rd")); assume
 repeat (one-td case-elim)
 repeat (one-td (unfold-rule "abs-rep-elim")); assume
 smash
-stop-script
 
+-- Transformation on last step:
 one-td (unfold 'lastStep)
 one-td beta-reduce
 one-td let-float
 one-td let-float
 one-td let-float
-one-td let-float
-one-td (unfold-rule "getIter-if"); assume
+one-td case-float-case
+one-td (unfold-rule "cond-intro"); assume
+
 repeat (one-td (unfold-rule ">*-intro"))
 one-bu let-subst
 one-bu case-elim
 repeat (one-td (unfold-rule "abs-float-triple3rd"))
 repeat (one-td (unfold-rule "abs-rep-elim"))
+--stop-script
 
 
-stop-script
 
 
 
@@ -98,4 +99,13 @@ top
 -- TODO: Unfold lastStep, then iterWhile one level and do abs-rep elimination
 application-of 'transform
 unfold-rule "Acc-finish"; assume
+repeat (one-td case-reduce)
+smash
+
+one-td (unfold-rule "cond-T-intro-cond"); assume
+repeat (one-td (unfold-rule ">*-intro"))
+one-bu let-subst
+one-bu case-elim
+repeat (one-td (unfold-rule "abs-float-triple3rd"))
+repeat (one-td (unfold-rule "abs-rep-elim"))
 

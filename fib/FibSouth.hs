@@ -35,7 +35,7 @@ fibSpec 1 = 1
 fibSpec n = fibSpec (n-1) + fibSpec (n-2)
 
 main :: IO ()
-main = print (transform (fib 20))
+main = print (transform (fib 200)) --20))
 
 
 
@@ -88,6 +88,13 @@ main = print (transform (fib 20))
     abs (if c then t else f)
       =
     A.cond (abs c) (abs t) (abs f)
+  #-}
+
+{-# RULES "cond-T-intro-cond" [~]
+    forall c1 c2 t f1 f2.
+    A.cond c1 (if c2 then t else f1) f2
+      =
+    A.cond c1 (A.cond (abs c2) t f1) f2
   #-}
 
 -- Push abs and rep into the conditionals of fn:
